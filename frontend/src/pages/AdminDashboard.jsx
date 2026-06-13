@@ -276,6 +276,16 @@ export default function AdminDashboard() {
             <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
               <h3 className="font-serif text-xl mb-1">Navigation</h3>
               <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Edit each navbar label, and toggle pages on/off. Home is always visible.</p>
+              <div className="mb-5 max-w-md">
+                <Label>Navbar Brand (logo text)</Label>
+                <Input
+                  value={settings.nav_brand || ""}
+                  placeholder={`${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`}
+                  onChange={(e) => setSettings({ ...settings, nav_brand: e.target.value })}
+                  data-testid="settings-nav-brand"
+                />
+                <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">Shown in the navbar and footer. Leave empty to use the couple names automatically.</p>
+              </div>
               <div className="grid md:grid-cols-2 gap-3 max-w-xl">
                 {[
                   ["home", "Home"],

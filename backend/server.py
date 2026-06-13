@@ -170,6 +170,7 @@ class SiteSettingsIn(BaseModel):
     contact_info: Optional[dict] = None
     visible_pages: Optional[dict] = None
     nav_labels: Optional[dict] = None
+    nav_brand: Optional[str] = None
 
 
 class ProductImport(BaseModel):

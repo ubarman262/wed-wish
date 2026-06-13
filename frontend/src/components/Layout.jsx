@@ -21,7 +21,8 @@ export default function Layout() {
     api.get("/settings").then((r) => setSettings(r.data || {})).catch(() => {});
   }, []);
 
-  const coupleShort = `${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`;
+  const coupleShort = (settings.nav_brand && settings.nav_brand.trim())
+    || `${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`;
   const vp = settings.visible_pages || {};
   const nl = settings.nav_labels || {};
   const navItems = NAV
