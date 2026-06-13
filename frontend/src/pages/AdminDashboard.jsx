@@ -6,6 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LogOut, Plus, Trash2, Edit, Upload, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +39,7 @@ export default function AdminDashboard() {
   const [editEvent, setEditEvent] = useState(null);
   const [editGift, setEditGift] = useState(null);
   const [editFund, setEditFund] = useState(null);
+  const [confirmDel, setConfirmDel] = useState(null); // {type, id, label}
 
   const token = typeof window !== "undefined" ? localStorage.getItem("wedwish_admin_token") : null;
   useEffect(() => {
@@ -102,10 +107,29 @@ export default function AdminDashboard() {
       loadAll();
     } catch { toast.error("Save failed"); }
   };
-  const deleteEvent = async (id) => {
-    if (!confirm("Delete event?")) return;
-    await api.delete(`/admin/events/${id}`);
-    toast.success("Deleted"); loadAll();
+  const deleteEvent = (id, label) => setConfirmDel({ type: "event", id, label });
+  const deleteGift = (id, label) => setConfirmDel({ type: "gift", id, label });
+  const deleteFund = (id, label) => setConfirmDel({ type: "fund", id, label });
+
+  const doDelete = async () => {
+    if (!confirmDel) return;
+    const path = { event: "events", gift: "gifts", fund: "funds" }[confirmDel.type];
+    try {
+      await api.delete(`/admin/${path}/${confirmDel.id}`);
+      toast.success("Deleted");
+      setConfirmDel(null);
+      loadAll();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Delete failed");
+    }
+  };
+
+  const releaseGift = async (id) => {
+    try {
+      await api.post(`/admin/gifts/${id}/release`);
+      toast.success("Reservation released");
+      loadAll();
+    } catch { toast.error("Release failed"); }
   };
 
   // Gifts
@@ -118,20 +142,14 @@ export default function AdminDashboard() {
       loadAll();
     } catch { toast.error("Save failed"); }
   };
-  const deleteGift = async (id) => {
-    if (!confirm("Delete gift?")) return;
-    await api.delete(`/admin/gifts/${id}`);
-    toast.success("Deleted"); loadAll();
-  };
-  const releaseGift = async (id) => {
-    await api.post(`/admin/gifts/${id}/release`);
-    toast.success("Reservation released"); loadAll();
-  };
+  const [importUrl, setImportUrl] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const importProduct = async () => {
-    const url = prompt("Paste product URL (Amazon/Flipkart)");
-    if (!url) return;
+    if (!importUrl.trim()) { toast.error("Enter a URL"); return; }
     try {
-      const { data } = await api.post("/admin/gifts/import", { url });
+      const { data } = await api.post("/admin/gifts/import", { url: importUrl });
+      setImportOpen(false);
+      setImportUrl("");
       setEditGift({ ...data });
       toast.success("Product imported — review & save");
     } catch { toast.error("Could not import. Add manually."); }
@@ -146,11 +164,6 @@ export default function AdminDashboard() {
       setEditFund(null);
       loadAll();
     } catch { toast.error("Save failed"); }
-  };
-  const deleteFund = async (id) => {
-    if (!confirm("Delete fund?")) return;
-    await api.delete(`/admin/funds/${id}`);
-    toast.success("Deleted"); loadAll();
   };
 
   const filteredGuests = guests.filter((g) =>
@@ -244,7 +257,7 @@ export default function AdminDashboard() {
                     <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">{e.venue_name}</p>
                     <div className="flex gap-2 mt-3">
                       <button onClick={() => setEditEvent(e)} className="text-xs gold-text"><Edit size={12} className="inline" /> Edit</button>
-                      <button onClick={() => deleteEvent(e.id)} className="text-xs text-red-700"><Trash2 size={12} className="inline" /> Delete</button>
+                      <button onClick={() => deleteEvent(e.id, e.title)} className="text-xs text-red-700" data-testid={`delete-event-${e.id}`}><Trash2 size={12} className="inline" /> Delete</button>
                     </div>
                   </div>
                 </div>
@@ -257,7 +270,7 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-center mb-5">
               {sectionTitle("Gift Registry")}
               <div className="flex gap-2">
-                <button onClick={importProduct} className="wed-btn-outline" data-testid="gift-import"><LinkIcon size={14} /> Import URL</button>
+                <button onClick={() => setImportOpen(true)} className="wed-btn-outline" data-testid="gift-import"><LinkIcon size={14} /> Import URL</button>
                 <button onClick={() => setEditGift({})} className="wed-btn-primary" data-testid="gift-new"><Plus size={14} /> New gift</button>
               </div>
             </div>
@@ -276,7 +289,7 @@ export default function AdminDashboard() {
                   <div className="flex gap-2 mt-3 text-xs">
                     <button onClick={() => setEditGift(g)} className="gold-text">Edit</button>
                     {g.status !== "available" && <button onClick={() => releaseGift(g.id)} className="text-[hsl(var(--muted-foreground))]">Release</button>}
-                    <button onClick={() => deleteGift(g.id)} className="text-red-700 ml-auto">Delete</button>
+                    <button onClick={() => deleteGift(g.id, g.title)} className="text-red-700 ml-auto" data-testid={`delete-gift-${g.id}`}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -297,7 +310,7 @@ export default function AdminDashboard() {
                   <p className="text-xs gold-text mt-2">₹{f.raised?.toLocaleString("en-IN") || 0} / ₹{f.goal_amount?.toLocaleString("en-IN")}</p>
                   <div className="flex gap-2 mt-3 text-xs">
                     <button onClick={() => setEditFund(f)} className="gold-text">Edit</button>
-                    <button onClick={() => deleteFund(f.id)} className="text-red-700 ml-auto">Delete</button>
+                    <button onClick={() => deleteFund(f.id, f.name)} className="text-red-700 ml-auto" data-testid={`delete-fund-${f.id}`}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -470,6 +483,53 @@ export default function AdminDashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* IMPORT URL MODAL */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="bg-[hsl(var(--card))]">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Import product</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Paste Amazon / Flipkart URL</Label>
+              <Input
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                placeholder="https://www.amazon.in/..."
+                data-testid="import-url-input"
+              />
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1.5">
+                We'll try to extract title, image and price. You can edit before saving.
+              </p>
+            </div>
+            <button onClick={importProduct} className="wed-btn-primary w-full" data-testid="import-url-submit">
+              Import
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE CONFIRM */}
+      <AlertDialog open={!!confirmDel} onOpenChange={(v) => !v && setConfirmDel(null)}>
+        <AlertDialogContent className="bg-[hsl(var(--card))]" data-testid="confirm-delete-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-2xl">Delete {confirmDel?.type}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDel?.label ? <>This will permanently delete <span className="font-medium text-[hsl(var(--foreground))]">{confirmDel.label}</span>.</> : "This action cannot be undone."}
+              {confirmDel?.type === "event" && " All RSVPs for this event will also be removed."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="confirm-delete-cancel">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={doDelete}
+              className="bg-red-700 hover:bg-red-800 text-white"
+              data-testid="confirm-delete-confirm"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
