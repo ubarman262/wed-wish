@@ -159,11 +159,16 @@ class SiteSettingsIn(BaseModel):
     couple_name_2: Optional[str] = None
     wedding_date: Optional[str] = None
     hero_image: Optional[str] = None
+    hero_overline: Optional[str] = None
     story_content: Optional[str] = None
     story_image: Optional[str] = None
     story_headline: Optional[str] = None
+    events_headline: Optional[str] = None
+    registry_headline: Optional[str] = None
+    gallery_headline: Optional[str] = None
     upi_id: Optional[str] = None
     contact_info: Optional[dict] = None
+    visible_pages: Optional[dict] = None
 
 
 class ProductImport(BaseModel):

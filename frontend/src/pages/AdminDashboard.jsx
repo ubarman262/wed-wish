@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -256,6 +257,50 @@ export default function AdminDashboard() {
                 <Textarea rows={6} value={settings.story_content || ""} onChange={(e) => setSettings({ ...settings, story_content: e.target.value })} data-testid="settings-story" /></div>
             </div>
             <button onClick={saveSettings} className="wed-btn-primary mt-6" data-testid="settings-save">Save settings</button>
+
+            <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
+              <h3 className="font-serif text-xl mb-1">Section Headlines</h3>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Leave empty to use the default (Events headline auto-computes from your events).</p>
+              <div className="grid md:grid-cols-2 gap-5">
+                <div><Label>Hero Overline</Label>
+                  <Input value={settings.hero_overline || ""} onChange={(e) => setSettings({ ...settings, hero_overline: e.target.value })} placeholder="A wedding invitation" data-testid="settings-hero-overline" /></div>
+                <div><Label>Events Headline</Label>
+                  <Input value={settings.events_headline || ""} onChange={(e) => setSettings({ ...settings, events_headline: e.target.value })} placeholder="(auto: Two days of joy.)" data-testid="settings-events-headline" /></div>
+                <div><Label>Registry Headline</Label>
+                  <Input value={settings.registry_headline || ""} onChange={(e) => setSettings({ ...settings, registry_headline: e.target.value })} placeholder="A few things we'd love." data-testid="settings-registry-headline" /></div>
+                <div><Label>Gallery Headline</Label>
+                  <Input value={settings.gallery_headline || ""} onChange={(e) => setSettings({ ...settings, gallery_headline: e.target.value })} placeholder="Our gallery, soon." data-testid="settings-gallery-headline" /></div>
+              </div>
+            </div>
+
+            <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
+              <h3 className="font-serif text-xl mb-1">Visible Pages</h3>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Toggle off any pages you don't want to show. Home is always visible.</p>
+              <div className="grid md:grid-cols-2 gap-3 max-w-xl">
+                {[
+                  ["our_story", "Our Story"],
+                  ["events", "Events"],
+                  ["registry", "Registry"],
+                  ["cash_gifts", "Cash Gifts"],
+                  ["gallery", "Gallery"],
+                  ["contact", "Contact"],
+                ].map(([key, label]) => {
+                  const vp = settings.visible_pages || {};
+                  const checked = vp[key] !== false;
+                  return (
+                    <label key={key} className="flex items-center justify-between p-3 rounded-md border border-[hsl(var(--border))] cursor-pointer" data-testid={`visibility-${key}`}>
+                      <span className="text-sm">{label}</span>
+                      <Switch
+                        checked={checked}
+                        onCheckedChange={(v) => setSettings({ ...settings, visible_pages: { ...vp, [key]: !!v } })}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button onClick={saveSettings} className="wed-btn-primary mt-8" data-testid="settings-save-bottom">Save settings</button>
           </TabsContent>
 
           {/* EVENTS */}

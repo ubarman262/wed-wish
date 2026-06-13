@@ -4,13 +4,13 @@ import { api } from "@/lib/api";
 import { Menu, X } from "lucide-react";
 
 const NAV = [
-  { to: "/", label: "Home" },
-  { to: "/our-story", label: "Our Story" },
-  { to: "/events", label: "Events" },
-  { to: "/registry", label: "Registry" },
-  { to: "/cash-gifts", label: "Cash Gifts" },
-  { to: "/gallery", label: "Gallery" },
-  { to: "/contact", label: "Contact" },
+  { to: "/", label: "Home", key: "home" },
+  { to: "/our-story", label: "Our Story", key: "our_story" },
+  { to: "/events", label: "Events", key: "events" },
+  { to: "/registry", label: "Registry", key: "registry" },
+  { to: "/cash-gifts", label: "Cash Gifts", key: "cash_gifts" },
+  { to: "/gallery", label: "Gallery", key: "gallery" },
+  { to: "/contact", label: "Contact", key: "contact" },
 ];
 
 export default function Layout() {
@@ -22,6 +22,8 @@ export default function Layout() {
   }, []);
 
   const coupleShort = `${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`;
+  const vp = settings.visible_pages || {};
+  const navItems = NAV.filter((n) => n.key === "home" || vp[n.key] !== false);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -34,7 +36,7 @@ export default function Layout() {
             {coupleShort}
           </Link>
           <nav className="hidden lg:flex items-center gap-8">
-            {NAV.map((n) => (
+            {navItems.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
@@ -64,7 +66,7 @@ export default function Layout() {
         {open && (
           <div className="lg:hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]" data-testid="mobile-menu">
             <div className="wed-container flex flex-col py-4 gap-3">
-              {NAV.map((n) => (
+              {navItems.map((n) => (
                 <NavLink
                   key={n.to}
                   to={n.to}

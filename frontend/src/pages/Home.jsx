@@ -34,6 +34,19 @@ export default function Home() {
   const dateStr = settings.wedding_date
     ? new Date(settings.wedding_date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })
     : "";
+  const vp = settings.visible_pages || {};
+  const showStory = vp.our_story !== false;
+  const showEvents = vp.events !== false;
+  const showRegistry = vp.registry !== false;
+  const showGallery = vp.gallery !== false;
+
+  const eventsHeadline = settings.events_headline || (() => {
+    const days = new Set(events.filter((e) => e.date).map((e) => new Date(e.date).toDateString())).size;
+    const words = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven"];
+    if (days === 0) return "Our celebrations.";
+    if (days === 1) return "One day of joy.";
+    return `${words[days] || days} days of joy.`;
+  })();
 
   return (
     <div data-testid="home-page">
@@ -41,7 +54,7 @@ export default function Home() {
       <section className="wed-section pt-12 md:pt-20" data-testid="hero-section">
         <div className="wed-container grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 space-y-8 animate-fade-up">
-            <p className="wed-overline">A wedding invitation</p>
+            <p className="wed-overline">{settings.hero_overline || "A wedding invitation"}</p>
             <h1 className="wed-display leading-[0.95]">
               {settings.couple_name_1 || "Ujjwal"}
               <span className="block gold-text">&</span>
@@ -91,6 +104,7 @@ export default function Home() {
       </section>
 
       {/* STORY PREVIEW */}
+      {showStory && (
       <section className="wed-section bg-[hsl(var(--secondary))]/30" data-testid="story-preview">
         <div className="wed-container grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-5">
@@ -114,20 +128,16 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* EVENTS PREVIEW */}
+      {showEvents && (
       <section className="wed-section" data-testid="events-preview">
         <div className="wed-container">
           <div className="flex items-end justify-between mb-12">
             <div>
               <p className="wed-overline">Celebrations</p>
-              <h2 className="wed-title mt-2">{(() => {
-                const days = new Set(events.filter(e => e.date).map(e => new Date(e.date).toDateString())).size;
-                const words = ["No","One","Two","Three","Four","Five","Six","Seven"];
-                if (days === 0) return "Our celebrations.";
-                if (days === 1) return "One day of joy.";
-                return `${words[days] || days} days of joy.`;
-              })()}</h2>
+              <h2 className="wed-title mt-2">{eventsHeadline}</h2>
             </div>
             <Link to="/events" className="hidden md:inline-flex text-sm gold-text hover:underline">
               All events →
@@ -150,13 +160,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* REGISTRY PREVIEW */}
+      {showRegistry && (
       <section className="wed-section bg-[hsl(var(--secondary))]/30" data-testid="registry-preview">
         <div className="wed-container">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <p className="wed-overline">Gift Registry</p>
-            <h2 className="wed-title mt-2">A few things we'd love.</h2>
+            <h2 className="wed-title mt-2">{settings.registry_headline || "A few things we'd love."}</h2>
             <p className="text-[hsl(var(--muted-foreground))] mt-4">
               Reserve a gift to let us know it's coming — or contribute to our shared funds.
             </p>
@@ -183,17 +195,20 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* GALLERY PREVIEW */}
+      {showGallery && (
       <section className="wed-section" data-testid="gallery-preview">
         <div className="wed-container text-center">
           <p className="wed-overline">Memories</p>
-          <h2 className="wed-title mt-2">Our gallery, soon.</h2>
+          <h2 className="wed-title mt-2">{settings.gallery_headline || "Our gallery, soon."}</h2>
           <p className="text-[hsl(var(--muted-foreground))] mt-4 max-w-xl mx-auto">
             After the celebrations, we'll share every cherished moment here.
           </p>
         </div>
       </section>
+      )}
     </div>
   );
 }
