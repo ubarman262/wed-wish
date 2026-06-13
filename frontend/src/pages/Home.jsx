@@ -121,7 +121,13 @@ export default function Home() {
           <div className="flex items-end justify-between mb-12">
             <div>
               <p className="wed-overline">Celebrations</p>
-              <h2 className="wed-title mt-2">Three days of joy.</h2>
+              <h2 className="wed-title mt-2">{(() => {
+                const days = new Set(events.filter(e => e.date).map(e => new Date(e.date).toDateString())).size;
+                const words = ["No","One","Two","Three","Four","Five","Six","Seven"];
+                if (days === 0) return "Our celebrations.";
+                if (days === 1) return "One day of joy.";
+                return `${words[days] || days} days of joy.`;
+              })()}</h2>
             </div>
             <Link to="/events" className="hidden md:inline-flex text-sm gold-text hover:underline">
               All events →
