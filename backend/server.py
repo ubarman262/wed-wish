@@ -456,31 +456,84 @@ async def delete_gift(gid: str, _=Depends(require_admin)):
 
 @api.post("/admin/gifts/import")
 async def import_product(body: ProductImport, _=Depends(require_admin)):
-    """Extract title/image/price from Amazon/Flipkart via OG metadata."""
+    """Extract title/image/price from Amazon/Flipkart/generic pages."""
     try:
-        r = requests.get(body.url, timeout=10, headers={
-            "User-Agent": "Mozilla/5.0 (compatible; WedWish/1.0)"
-        })
-        soup = BeautifulSoup(r.text, "lxml")
+        r = requests.get(body.url, timeout=12, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; WedWish/1.0)",
+            "Accept-Language": "en-IN,en;q=0.9",
+        }, allow_redirects=True)
+        html = r.text
+        final_url = str(r.url)
+        soup = BeautifulSoup(html, "lxml")
 
         def meta(prop):
             tag = soup.find("meta", property=prop) or soup.find("meta", attrs={"name": prop})
             return tag.get("content") if tag else None
 
-        title = meta("og:title") or (soup.title.string if soup.title else None)
-        image = meta("og:image")
+        title = None
+        image = None
         price = None
-        price_meta = meta("product:price:amount") or meta("og:price:amount")
-        if price_meta:
+
+        host = (final_url or body.url).lower()
+        is_amazon = "amazon." in host or "amzn." in host
+        is_flipkart = "flipkart." in host or "fkrt." in host
+
+        # Title
+        if is_amazon:
+            tag = soup.find("span", id="productTitle")
+            if tag: title = tag.get_text(strip=True)
+        if not title:
+            title = meta("og:title") or (soup.title.string if soup.title else None)
+        if title:
+            title = re.sub(r"\s+", " ", title).strip()
+            # Strip Amazon's "Buy ... : Amazon.in" prefix/suffix
+            title = re.sub(r"^Buy\s+", "", title, flags=re.I)
+            title = re.split(r"\s*[:|]\s*Amazon\.[a-z.]+", title, maxsplit=1)[0]
+            title = title[:200]
+
+        # Image
+        if is_amazon:
+            img_tag = soup.find("img", id="landingImage") or soup.find("img", id="imgBlkFront")
+            if img_tag:
+                image = img_tag.get("data-old-hires") or img_tag.get("src")
+            if not image:
+                m = re.search(r'"hiRes":"(https?://[^"]+)"', html)
+                if m: image = m.group(1)
+            if not image:
+                m = re.search(r'"large":"(https?://[^"]+)"', html)
+                if m: image = m.group(1)
+        if not image and is_flipkart:
+            img_tag = soup.select_one("img._396cs4") or soup.select_one("img._2r_T1I") or soup.select_one("img.q6DClP")
+            if img_tag:
+                image = img_tag.get("src")
+        if not image:
+            image = meta("og:image")
+        if not image:
+            ls = soup.find("link", rel="image_src")
+            if ls: image = ls.get("href")
+
+        # Price
+        price_text = None
+        if is_amazon:
+            el = soup.select_one("span.a-price span.a-offscreen") or soup.select_one("span.a-offscreen")
+            if el: price_text = el.get_text(strip=True)
+        if not price_text and is_flipkart:
+            el = soup.select_one("div._30jeq3") or soup.select_one("div._16Jk6d")
+            if el: price_text = el.get_text(strip=True)
+        if not price_text:
+            price_text = meta("product:price:amount") or meta("og:price:amount")
+        if price_text:
+            cleaned = re.sub(r"[^0-9.]", "", price_text)
             try:
-                price = float(re.sub(r"[^0-9.]", "", price_meta))
+                price = float(cleaned) if cleaned else None
             except Exception:
                 price = None
+
         return {
-            "title": (title or "").strip()[:200],
+            "title": title or "",
             "image_url": image,
             "price": price,
-            "product_url": body.url,
+            "product_url": final_url or body.url,
         }
     except Exception as ex:
         raise HTTPException(400, f"Could not extract: {ex}")
