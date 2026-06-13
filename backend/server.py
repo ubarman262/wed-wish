@@ -160,6 +160,8 @@ class SiteSettingsIn(BaseModel):
     wedding_date: Optional[str] = None
     hero_image: Optional[str] = None
     story_content: Optional[str] = None
+    story_image: Optional[str] = None
+    story_headline: Optional[str] = None
     upi_id: Optional[str] = None
     contact_info: Optional[dict] = None
 
@@ -180,6 +182,8 @@ async def seed_data():
             "wedding_date": (datetime.now(timezone.utc) + timedelta(days=120)).isoformat(),
             "hero_image": "https://images.pexels.com/photos/35069916/pexels-photo-35069916.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
             "story_content": "Our story began in a quiet bookshop in 2019. What started as a chance conversation grew into a love that has weathered late-night phone calls, long-distance trips, shared dreams and quiet mornings. We are excited to begin this next chapter together — surrounded by the people who shaped us.",
+            "story_image": "https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=1200",
+            "story_headline": "How a chance meeting turned into forever.",
             "upi_id": "ujjwal.kasturika@upi",
             "contact_info": {
                 "couple_phone": "+91 98765 43210",

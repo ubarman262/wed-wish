@@ -95,7 +95,7 @@ export default function Home() {
         <div className="wed-container grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-5">
             <p className="wed-overline">Our Story</p>
-            <h2 className="wed-title">How a chance meeting turned into forever.</h2>
+            <h2 className="wed-title">{settings.story_headline || "How a chance meeting turned into forever."}</h2>
             <p className="text-[hsl(var(--muted-foreground))] leading-relaxed line-clamp-5">
               {settings.story_content}
             </p>
@@ -106,7 +106,7 @@ export default function Home() {
           <div className="lg:col-span-5">
             <div className="aspect-[3/4] bg-[hsl(var(--muted))] overflow-hidden rounded-lg">
               <img
-                src="https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=800"
+                src={resolveImage(settings.story_image) || "https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=800"}
                 className="w-full h-full object-cover"
                 alt=""
               />

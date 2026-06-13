@@ -15,7 +15,7 @@ export default function OurStory() {
         </h1>
         <div className="aspect-[16/9] mt-12 mb-12 overflow-hidden rounded-lg">
           <img
-            src="https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=1200"
+            src={resolveImage(s.story_image) || "https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=1200"}
             alt=""
             className="w-full h-full object-cover"
           />

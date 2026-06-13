@@ -235,6 +235,23 @@ export default function AdminDashboard() {
                 </div>
                 {settings.hero_image && <img src={resolveImage(settings.hero_image)} alt="" className="mt-3 h-32 object-cover rounded" />}
               </div>
+              <div className="md:col-span-2"><Label>Story Headline</Label>
+                <Input value={settings.story_headline || ""} onChange={(e) => setSettings({ ...settings, story_headline: e.target.value })} placeholder="How a chance meeting turned into forever." data-testid="settings-story-headline" /></div>
+              <div className="md:col-span-2"><Label>Story Image URL or Upload</Label>
+                <div className="flex gap-2">
+                  <Input value={settings.story_image || ""} onChange={(e) => setSettings({ ...settings, story_image: e.target.value })} data-testid="settings-story-image" />
+                  <label className="wed-btn-outline px-3 cursor-pointer">
+                    <Upload size={14} />
+                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                      if (e.target.files?.[0]) {
+                        const url = await uploadImage(e.target.files[0], "story");
+                        setSettings({ ...settings, story_image: url });
+                      }
+                    }} />
+                  </label>
+                </div>
+                {settings.story_image && <img src={resolveImage(settings.story_image)} alt="" className="mt-3 h-32 object-cover rounded" />}
+              </div>
               <div className="md:col-span-2"><Label>Story Content</Label>
                 <Textarea rows={6} value={settings.story_content || ""} onChange={(e) => setSettings({ ...settings, story_content: e.target.value })} data-testid="settings-story" /></div>
             </div>
