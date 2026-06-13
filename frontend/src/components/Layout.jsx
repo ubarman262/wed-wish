@@ -21,6 +21,12 @@ export default function Layout() {
     api.get("/settings").then((r) => setSettings(r.data || {})).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const t = settings.theme || "champagne";
+    if (t === "champagne") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+  }, [settings.theme]);
+
   const coupleShort = (settings.nav_brand && settings.nav_brand.trim())
     || `${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`;
   const vp = settings.visible_pages || {};

@@ -171,6 +171,7 @@ class SiteSettingsIn(BaseModel):
     visible_pages: Optional[dict] = None
     nav_labels: Optional[dict] = None
     nav_brand: Optional[str] = None
+    theme: Optional[str] = None
 
 
 class ProductImport(BaseModel):

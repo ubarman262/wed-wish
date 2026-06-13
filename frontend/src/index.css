@@ -4,27 +4,116 @@
 
 @layer base {
     :root {
-        /* Wedding luxury palette */
-        --background: 40 33% 97%;       /* #FAF9F6 ivory */
-        --foreground: 28 8% 16%;        /* #2C2A28 charcoal */
-        --card: 36 50% 98%;             /* warm white #FDFBF7 */
+        /* Theme: Champagne Ivory (default) — ivory + champagne gold */
+        --background: 40 33% 97%;
+        --foreground: 28 8% 16%;
+        --card: 36 50% 98%;
         --card-foreground: 28 8% 16%;
         --popover: 36 50% 98%;
         --popover-foreground: 28 8% 16%;
-        --primary: 38 47% 56%;          /* champagne gold #C5A059 */
+        --primary: 38 47% 56%;
         --primary-foreground: 40 33% 97%;
-        --secondary: 35 38% 86%;        /* soft beige #EADDCA */
+        --secondary: 35 38% 86%;
         --secondary-foreground: 28 8% 16%;
         --muted: 35 38% 92%;
-        --muted-foreground: 28 7% 35%;  /* #5C564D */
+        --muted-foreground: 28 7% 35%;
         --accent: 35 38% 86%;
         --accent-foreground: 28 8% 16%;
         --destructive: 0 50% 45%;
         --destructive-foreground: 40 33% 97%;
-        --border: 40 35% 83%;           /* #E5DCC5 */
+        --border: 40 35% 83%;
         --input: 40 35% 83%;
         --ring: 38 47% 56%;
         --radius: 0.5rem;
+        --primary-hover: #b08d44;
+    }
+
+    /* Theme: Royal Maroon — deep maroon + gold on warm ivory */
+    [data-theme="maroon"] {
+        --background: 36 30% 96%;
+        --foreground: 0 30% 16%;
+        --card: 36 40% 99%;
+        --card-foreground: 0 30% 16%;
+        --popover: 36 40% 99%;
+        --popover-foreground: 0 30% 16%;
+        --primary: 350 55% 35%;
+        --primary-foreground: 36 30% 97%;
+        --secondary: 36 30% 88%;
+        --secondary-foreground: 0 30% 16%;
+        --muted: 36 25% 92%;
+        --muted-foreground: 0 12% 32%;
+        --accent: 38 47% 56%;
+        --accent-foreground: 0 30% 16%;
+        --border: 36 25% 82%;
+        --input: 36 25% 82%;
+        --ring: 350 55% 35%;
+        --primary-hover: #6b1c2a;
+    }
+
+    /* Theme: Sage Garden — sage + cream + bronze */
+    [data-theme="sage"] {
+        --background: 60 18% 96%;
+        --foreground: 90 15% 18%;
+        --card: 60 25% 98%;
+        --card-foreground: 90 15% 18%;
+        --popover: 60 25% 98%;
+        --popover-foreground: 90 15% 18%;
+        --primary: 110 18% 38%;
+        --primary-foreground: 60 18% 97%;
+        --secondary: 80 20% 86%;
+        --secondary-foreground: 90 15% 18%;
+        --muted: 80 15% 92%;
+        --muted-foreground: 90 10% 32%;
+        --accent: 30 30% 60%;
+        --accent-foreground: 90 15% 18%;
+        --border: 80 15% 80%;
+        --input: 80 15% 80%;
+        --ring: 110 18% 38%;
+        --primary-hover: #3e5836;
+    }
+
+    /* Theme: Midnight Rose — dark navy + dusty rose */
+    [data-theme="midnight"] {
+        --background: 220 25% 11%;
+        --foreground: 30 20% 92%;
+        --card: 220 22% 15%;
+        --card-foreground: 30 20% 92%;
+        --popover: 220 22% 15%;
+        --popover-foreground: 30 20% 92%;
+        --primary: 348 50% 65%;
+        --primary-foreground: 220 25% 12%;
+        --secondary: 220 20% 22%;
+        --secondary-foreground: 30 20% 92%;
+        --muted: 220 18% 22%;
+        --muted-foreground: 30 12% 70%;
+        --accent: 38 47% 60%;
+        --accent-foreground: 220 25% 12%;
+        --border: 220 18% 28%;
+        --input: 220 18% 28%;
+        --ring: 348 50% 65%;
+        --primary-hover: #d97b95;
+    }
+
+    /* Theme: Coral Sunset — terracotta + coral + cream */
+    [data-theme="coral"] {
+        --background: 30 40% 96%;
+        --foreground: 15 30% 18%;
+        --card: 30 50% 98%;
+        --card-foreground: 15 30% 18%;
+        --popover: 30 50% 98%;
+        --popover-foreground: 15 30% 18%;
+        --primary: 12 55% 52%;
+        --primary-foreground: 30 40% 97%;
+        --secondary: 20 40% 88%;
+        --secondary-foreground: 15 30% 18%;
+        --muted: 20 35% 92%;
+        --muted-foreground: 15 15% 32%;
+        --accent: 35 50% 70%;
+        --accent-foreground: 15 30% 18%;
+        --border: 20 30% 82%;
+        --input: 20 30% 82%;
+        --ring: 12 55% 52%;
+        --primary-hover: #b54a32;
     }
 }
 
@@ -69,9 +158,10 @@
     .wed-btn-primary {
         @apply inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full
                bg-[hsl(var(--primary))] text-white font-medium tracking-wide
-               transition-all duration-300 hover:bg-[#b08d44]
+               transition-all duration-300
                disabled:opacity-50 disabled:cursor-not-allowed;
     }
+    .wed-btn-primary:hover { background: var(--primary-hover, #b08d44); }
     .wed-btn-outline {
         @apply inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full
                border border-[hsl(var(--primary))] text-[hsl(var(--primary))] font-medium tracking-wide

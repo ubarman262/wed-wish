@@ -48,6 +48,12 @@ export default function AdminDashboard() {
     loadAll();
   }, []);
 
+  useEffect(() => {
+    const t = settings.theme || "champagne";
+    if (t === "champagne") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+  }, [settings.theme]);
+
   const loadAll = async () => {
     try {
       const [s, st, ev, gf, fd, gs, rv, cb, ms] = await Promise.all([
@@ -257,6 +263,44 @@ export default function AdminDashboard() {
                 <Textarea rows={6} value={settings.story_content || ""} onChange={(e) => setSettings({ ...settings, story_content: e.target.value })} data-testid="settings-story" /></div>
             </div>
             <button onClick={saveSettings} className="wed-btn-primary mt-6" data-testid="settings-save">Save settings</button>
+
+            <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
+              <h3 className="font-serif text-xl mb-1">Theme</h3>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Click a palette to preview. Save to publish.</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {[
+                  { key: "champagne", name: "Champagne Ivory", bg: "#FAF9F6", fg: "#2C2A28", primary: "#C5A059", secondary: "#EADDCA" },
+                  { key: "maroon", name: "Royal Maroon", bg: "#F7F2EB", fg: "#3A1B1E", primary: "#8A2C3C", secondary: "#E0D2BE" },
+                  { key: "sage", name: "Sage Garden", bg: "#F5F5EE", fg: "#262E22", primary: "#557A4F", secondary: "#D6DCC5" },
+                  { key: "midnight", name: "Midnight Rose", bg: "#171C26", fg: "#ECE5DA", primary: "#D88FA3", secondary: "#2C3340" },
+                  { key: "coral", name: "Coral Sunset", bg: "#F8EFE6", fg: "#3B2820", primary: "#CB573F", secondary: "#ECD7C2" },
+                ].map((t) => {
+                  const active = (settings.theme || "champagne") === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setSettings({ ...settings, theme: t.key })}
+                      className={`relative text-left rounded-lg border-2 transition-all p-3 ${
+                        active ? "border-[hsl(var(--primary))] shadow-md" : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/60"
+                      }`}
+                      data-testid={`theme-${t.key}`}
+                      style={{ background: t.bg, color: t.fg }}
+                    >
+                      <div className="flex gap-1.5 mb-3">
+                        <span className="w-6 h-6 rounded-full border" style={{ background: t.primary, borderColor: t.fg + "22" }} />
+                        <span className="w-6 h-6 rounded-full border" style={{ background: t.secondary, borderColor: t.fg + "22" }} />
+                        <span className="w-6 h-6 rounded-full border" style={{ background: t.bg, borderColor: t.fg + "55" }} />
+                      </div>
+                      <div className="font-serif text-base leading-tight">{t.name}</div>
+                      <div className="text-[10px] uppercase tracking-widest mt-1 opacity-70">
+                        {active ? "Selected" : "Preview"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
               <h3 className="font-serif text-xl mb-1">Section Headlines</h3>
