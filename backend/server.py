@@ -22,6 +22,7 @@ import bcrypt
 import jwt as pyjwt
 import requests
 from bs4 import BeautifulSoup
+from PIL import Image, ImageOps
 
 ROOT_DIR = Path(__file__).parent
 UPLOAD_DIR = ROOT_DIR / "uploads"
@@ -737,10 +738,32 @@ async def upload_file(
 ):
     safe_folder = folder if folder in {"gifts", "events", "hero", "story"} else "gifts"
     ext = Path(file.filename).suffix.lower() or ".png"
+    # Normalize JPEGs and HEIC outputs to .jpg
+    if ext in {".jpeg", ".jpe"}:
+        ext = ".jpg"
     name = f"{new_id()}{ext}"
     path = UPLOAD_DIR / safe_folder / name
     content = await file.read()
-    path.write_bytes(content)
+
+    # Auto-rotate based on EXIF and strip metadata to fix iPhone/Android upside-down photos
+    try:
+        from io import BytesIO
+        img = Image.open(BytesIO(content))
+        img = ImageOps.exif_transpose(img)
+        if ext in {".jpg", ".jpeg"} or img.format == "JPEG":
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+            img.save(path, format="JPEG", quality=88, optimize=True)
+        elif ext == ".png":
+            img.save(path, format="PNG", optimize=True)
+        elif ext == ".webp":
+            img.save(path, format="WEBP", quality=88)
+        else:
+            img.save(path)
+    except Exception:
+        # If Pillow can't handle it (e.g. SVG), fall back to raw write
+        path.write_bytes(content)
+
     return {"url": f"/api/uploads/{safe_folder}/{name}"}
 
 
