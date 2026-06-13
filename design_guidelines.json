@@ -1,0 +1,89 @@
+{
+  "theme": "light",
+  "archetype": "5 (Luxury - Light Variant)",
+  "colors": {
+    "background": "#FAF9F6",
+    "surface": "#FDFBF7",
+    "primary": "#C5A059",
+    "secondary": "#EADDCA",
+    "text_primary": "#2C2A28",
+    "text_secondary": "#5C564D",
+    "border": "#E5DCC5"
+  },
+  "typography": {
+    "heading_font": "Cormorant Garamond",
+    "body_font": "Outfit",
+    "rules": {
+      "h1": "text-5xl sm:text-6xl lg:text-7xl tracking-tighter font-light text-primary",
+      "h2": "text-3xl sm:text-4xl lg:text-5xl tracking-tight font-light text-text_primary",
+      "h3": "text-2xl sm:text-3xl font-light text-text_primary",
+      "body": "text-base leading-relaxed text-text_secondary",
+      "overline": "text-xs uppercase tracking-[0.2em] text-primary"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing Philosophy. Use 2-3x more spacing than typical SaaS designs to create a breathable, elegant feel.",
+    "section_padding": "py-20 md:py-32 px-6 md:px-12",
+    "grid_strategy": "MODE A: THE 'TETRIS' GRID for public pages (asymmetry, large spanning images). MODE B: THE 'CONTROL ROOM' for Admin dashboard (dense, clear metrics).",
+    "borders": "1px delicate inner stroke for premium feel (border-[#E5DCC5])",
+    "surfaces": "Flat solid surfaces with subtle borders. Avoid heavy drop shadows; use soft ambient shadows only where necessary."
+  },
+  "motion": {
+    "hover_states": "-translate-y-1 shadow-lg border-primary/50 transition-all duration-300",
+    "scroll_effects": "Fade-in up staggered for lists and gallery items. Momentum scrolling recommended if possible.",
+    "page_transitions": "Smooth opacity transitions for an editorial feel."
+  },
+  "components": {
+    "navigation": "Sticky nav with backdrop-blur-md bg-background/80, delicate bottom border. Must always display Ujjwal & Kasturika.",
+    "hero": "Asymmetrical layout: large serif text with an arched (rounded-t-full) or soft-edged image. Max overlay opacity bg-black/30 if text overlays the image.",
+    "events_timeline": "Vertical timeline with overlapping image cards and elegant serif dates. Generous spacing between events.",
+    "registry_cards": "Flat cards, 1px subtle gold border, Outfit font for details, Cormorant Garamond for titles.",
+    "admin_dashboard": "Strict grid hierarchy, dense and compact spacing. Cardless or minimal cards with subtle borders."
+  },
+  "image_urls": {
+    "hero": {
+      "url": "https://images.pexels.com/photos/35069916/pexels-photo-35069916.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Indian couple in traditional attire, great for the hero section."
+    },
+    "story": {
+      "url": "https://images.unsplash.com/photo-1722952934708-749c22eb2e58?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjB3ZWRkaW5nJTIwY291cGxlfGVufDB8fHx8MTc4MTI1MTYxN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "A bride and groom posing, ideal for Our Story timeline."
+    },
+    "event_haldi": {
+      "url": "https://images.unsplash.com/photo-1681717075175-19feb7a6f664?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODh8MHwxfHNlYXJjaHwxfHxoYWxkaSUyMGNlcmVtb255JTIweWVsbG93JTIwZmxvcmFsfGVufDB8fHx8MTc4MTM4NTc4OHww&ixlib=rb-4.1.0&q=85",
+      "description": "Woman in yellow sari with garland, perfect for Haldi event card."
+    },
+    "event_mehendi": {
+      "url": "https://images.unsplash.com/photo-1762708590908-4b9a36dda563?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHw0fHxtZWhlbmRpJTIwY2VyZW1vbnklMjBncmVlbiUyMGhlbm5hfGVufDB8fHx8MTc4MTM4NTc4OHww&ixlib=rb-4.1.0&q=85",
+      "description": "Woman in traditional green attire, perfect for Mehendi event card."
+    },
+    "event_wedding": {
+      "url": "https://images.unsplash.com/photo-1621801306185-8c0ccf9c8eb8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB3ZWRkaW5nJTIwY291cGxlfGVufDB8fHx8MTc4MTI1MTYxN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Close up of holding hands with henna and red bangles, perfect for Wedding event card."
+    },
+    "gallery_decor": {
+       "url": "https://images.unsplash.com/photo-1646925910554-8ae45b5c7c2d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA0MTJ8MHwxfHNlYXJjaHwyfHxlbGVnYW50JTIwYmVpZ2UlMjBmbG9yYWwlMjBhcnJhbmdlbWVudHxlbnwwfHx8fDE3ODEzODU3OTZ8MA&ixlib=rb-4.1.0&q=85",
+       "description": "Elegant white flowers on a table, perfect for Reception or gallery."
+    },
+    "texture_background": {
+      "url": "https://images.unsplash.com/photo-1545873509-33e944ca7655?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHxjaGFtcGFnbmUlMjBnb2xkJTIwdGV4dHVyZSUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzgxMzg1Nzg4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Gold metallic foil texture for subtle accents."
+    }
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure minimum 4.5:1 for normal text against ivory/beige backgrounds. Use deep charcoal (#2C2A28) for legibility, not pure black.",
+    "testing": "All interactive and key informational elements MUST include a data-testid attribute (e.g., data-testid='rsvp-submit-button', data-testid='gift-fund-progress').",
+    "animations": "Respect prefers-reduced-motion."
+  },
+  "instructions_to_main_agent": [
+    "Build the UI using pure HTML+Tailwind for public pages to allow maximum creative freedom.",
+    "Use customized Shadcn components for interactive logic (RSVP dialogs, Admin Dashboard). Ensure Shadcn styling is stripped of its default 'Vercel-look' and aligns with the luxury ivory/gold theme.",
+    "Strictly follow the color palette: Ivory, Warm White, Champagne Gold, Soft Beige. Avoid loud gradients, bright red, or neon.",
+    "Apply 'Cormorant Garamond' to all headings and 'Outfit' to all body text. Never use Inter, Roboto, or Playfair.",
+    "Ensure generous spacing (py-20 to py-32) between sections on the public site.",
+    "Include specific event cards for Haldi, Mehendi, Wedding, and Reception utilizing the provided image URLs.",
+    "The admin dashboard should use a denser 'Control Room' grid layout but maintain the same premium typography and colors.",
+    "Implement the RSVP system as a sleek modal using Shadcn Dialog with customized beige/gold styling.",
+    "Implement the UPI QR code for Cash Gifts inside a visually distinct 'premium card' layout."
+  ]
+}
