@@ -13,7 +13,7 @@ from typing import Optional, List
 
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Header, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -750,6 +750,22 @@ async def serve_upload(folder: str, name: str):
     if not p.exists():
         raise HTTPException(404)
     return FileResponse(p)
+
+
+@api.get("/og/image")
+async def og_share_image():
+    """Resolves the current hero image for social link previews."""
+    s = await db.settings.find_one({"_key": "site"})
+    img = (s or {}).get("hero_image") or ""
+    if img.startswith("http"):
+        return RedirectResponse(url=img)
+    if img.startswith("/api/uploads/"):
+        parts = img.replace("/api/uploads/", "").split("/", 1)
+        if len(parts) == 2:
+            p = UPLOAD_DIR / parts[0] / parts[1]
+            if p.exists():
+                return FileResponse(p)
+    return RedirectResponse(url="https://images.unsplash.com/photo-1621801306185-8c0ccf9c8eb8?w=1200&h=630&fit=crop")
 
 
 # ---------- Mount ----------
