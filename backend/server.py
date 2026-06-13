@@ -169,6 +169,7 @@ class SiteSettingsIn(BaseModel):
     upi_id: Optional[str] = None
     contact_info: Optional[dict] = None
     visible_pages: Optional[dict] = None
+    nav_labels: Optional[dict] = None
 
 
 class ProductImport(BaseModel):

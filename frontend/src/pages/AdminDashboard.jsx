@@ -274,10 +274,11 @@ export default function AdminDashboard() {
             </div>
 
             <div className="mt-10 pt-8 border-t border-[hsl(var(--border))]">
-              <h3 className="font-serif text-xl mb-1">Visible Pages</h3>
-              <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Toggle off any pages you don't want to show. Home is always visible.</p>
+              <h3 className="font-serif text-xl mb-1">Navigation</h3>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mb-5">Edit each navbar label, and toggle pages on/off. Home is always visible.</p>
               <div className="grid md:grid-cols-2 gap-3 max-w-xl">
                 {[
+                  ["home", "Home"],
                   ["our_story", "Our Story"],
                   ["events", "Events"],
                   ["registry", "Registry"],
@@ -286,15 +287,24 @@ export default function AdminDashboard() {
                   ["contact", "Contact"],
                 ].map(([key, label]) => {
                   const vp = settings.visible_pages || {};
-                  const checked = vp[key] !== false;
+                  const nl = settings.nav_labels || {};
+                  const checked = key === "home" ? true : vp[key] !== false;
                   return (
-                    <label key={key} className="flex items-center justify-between p-3 rounded-md border border-[hsl(var(--border))] cursor-pointer" data-testid={`visibility-${key}`}>
-                      <span className="text-sm">{label}</span>
-                      <Switch
-                        checked={checked}
-                        onCheckedChange={(v) => setSettings({ ...settings, visible_pages: { ...vp, [key]: !!v } })}
+                    <div key={key} className="flex items-center gap-3 p-3 rounded-md border border-[hsl(var(--border))]" data-testid={`visibility-${key}`}>
+                      <Input
+                        value={nl[key] ?? ""}
+                        placeholder={label}
+                        onChange={(e) => setSettings({ ...settings, nav_labels: { ...nl, [key]: e.target.value } })}
+                        className="flex-1"
+                        data-testid={`nav-label-${key}`}
                       />
-                    </label>
+                      {key !== "home" && (
+                        <Switch
+                          checked={checked}
+                          onCheckedChange={(v) => setSettings({ ...settings, visible_pages: { ...vp, [key]: !!v } })}
+                        />
+                      )}
+                    </div>
                   );
                 })}
               </div>

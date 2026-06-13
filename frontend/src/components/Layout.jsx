@@ -23,7 +23,10 @@ export default function Layout() {
 
   const coupleShort = `${settings.couple_name_1 || "U"} & ${settings.couple_name_2 || "K"}`;
   const vp = settings.visible_pages || {};
-  const navItems = NAV.filter((n) => n.key === "home" || vp[n.key] !== false);
+  const nl = settings.nav_labels || {};
+  const navItems = NAV
+    .filter((n) => n.key === "home" || vp[n.key] !== false)
+    .map((n) => ({ ...n, label: nl[n.key] || n.label }));
 
   return (
     <div className="min-h-screen flex flex-col">
