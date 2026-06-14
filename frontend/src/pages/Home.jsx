@@ -56,19 +56,18 @@ export default function Home() {
 
           {/* ===== MOBILE / TABLET LAYOUT ===== */}
           <div className="lg:hidden">
-            {/* Arched hero image with rose border + side floral accents */}
-            <div className="relative animate-fade-up">
-              <Flower2 className="absolute left-0 top-1/2 -translate-y-1/2 text-[hsl(var(--primary))] opacity-25" size={56} strokeWidth={0.6} aria-hidden />
-              <Flower2 className="absolute right-0 top-1/2 -translate-y-1/2 text-[hsl(var(--primary))] opacity-25" size={56} strokeWidth={0.6} aria-hidden />
-              <div className="mx-auto w-[88%]">
+            {/* Arched hero image with outer rose border (gap inside) */}
+            <div className="relative animate-fade-up px-4">
+              <div className="relative">
+                <div className="absolute -inset-3 border border-[hsl(var(--primary))]/50 rounded-t-[220px] pointer-events-none" />
                 <img
                   src={resolveImage(settings.hero_image)}
                   alt="Couple"
-                  className="w-full aspect-[4/5] object-cover rounded-t-[200px] border border-[hsl(var(--primary))]/60 shadow-2xl"
+                  className="relative w-full aspect-[4/5] object-cover rounded-t-[200px] shadow-2xl"
                   data-testid="hero-image"
                 />
               </div>
-              <div className="flex justify-center mt-3">
+              <div className="flex justify-center mt-5">
                 <Flower2 className="text-[hsl(var(--primary))]" size={18} />
               </div>
             </div>
@@ -275,15 +274,15 @@ export default function Home() {
               Reserve a gift to let us know it's coming — or contribute to our shared funds.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
             {gifts.slice(0, 3).map((g) => (
               <div key={g.id} className="wed-card overflow-hidden">
                 <div className="aspect-square overflow-hidden bg-[hsl(var(--muted))]">
                   <img src={resolveImage(g.image_url)} alt={g.title} className="w-full h-full object-cover" />
                 </div>
-                <div className="p-5">
-                  <h3 className="font-serif text-xl">{g.title}</h3>
-                  <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+                <div className="p-3 sm:p-5">
+                  <h3 className="font-serif text-base sm:text-xl leading-tight">{g.title}</h3>
+                  <p className="text-xs sm:text-sm text-[hsl(var(--muted-foreground))] mt-1">
                     ₹{g.price?.toLocaleString("en-IN")}
                   </p>
                 </div>
