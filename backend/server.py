@@ -13,7 +13,7 @@ from typing import Optional, List
 
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Header, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -191,9 +191,10 @@ async def seed_data():
             "couple_name_2": "Kasturika",
             "registry_show_prices": True,
             "wedding_date": (datetime.now(timezone.utc) + timedelta(days=120)).isoformat(),
-            "hero_image": "https://images.pexels.com/photos/35069916/pexels-photo-35069916.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+            # Use backend placeholder endpoints instead of external Unsplash/Pexels URLs
+            "hero_image": "/api/placeholder/hero",
             "story_content": "Our story began in a quiet bookshop in 2019. What started as a chance conversation grew into a love that has weathered late-night phone calls, long-distance trips, shared dreams and quiet mornings. We are excited to begin this next chapter together — surrounded by the people who shaped us.",
-            "story_image": "https://images.unsplash.com/photo-1722952934708-749c22eb2e58?w=1200",
+            "story_image": "/api/placeholder/story",
             "story_headline": "How a chance meeting turned into forever.",
             "upi_id": "ujjwal.kasturika@upi",
             "contact_info": {
@@ -216,22 +217,22 @@ async def seed_data():
              (base - timedelta(days=2)).replace(hour=10).isoformat(),
              "Sharma Residence", "12 Marigold Lane, Jaipur",
              "https://maps.google.com/?q=Sharma+Residence",
-             "https://images.unsplash.com/photo-1681717075175-19feb7a6f664?w=940"),
+             "/api/placeholder/event"),
             ("Mehendi Night", "Intricate henna, music and an evening that lingers.",
              (base - timedelta(days=1)).replace(hour=18).isoformat(),
              "Garden Courtyard", "Hotel Rambagh, Jaipur",
              "https://maps.google.com/?q=Hotel+Rambagh+Jaipur",
-             "https://images.unsplash.com/photo-1762708590908-4b9a36dda563?w=940"),
+             "/api/placeholder/event"),
             ("Wedding Ceremony", "The sacred vows under a canopy of marigolds.",
              base.replace(hour=19).isoformat(),
              "Rambagh Lawns", "Hotel Rambagh, Jaipur",
              "https://maps.google.com/?q=Hotel+Rambagh+Jaipur",
-             "https://images.unsplash.com/photo-1621801306185-8c0ccf9c8eb8?w=940"),
+             "/api/placeholder/event"),
             ("Reception", "An evening of toasts, dancing, and celebration.",
              (base + timedelta(days=1)).replace(hour=20).isoformat(),
              "Grand Ballroom", "ITC Rajputana, Jaipur",
              "https://maps.google.com/?q=ITC+Rajputana+Jaipur",
-             "https://images.unsplash.com/photo-1646925910554-8ae45b5c7c2d?w=940"),
+             "/api/placeholder/event"),
         ]
         for title, desc, dt, venue, addr, mlink, img in events:
             await db.events.insert_one({
@@ -255,18 +256,18 @@ async def seed_data():
     # Sample gifts
     if await db.gifts.count_documents({}) == 0:
         for t, d, p, img in [
-            ("Espresso Machine", "For slow mornings together.", 24999,
-             "https://images.unsplash.com/photo-1572119003128-d110c07af847?w=600"),
-            ("Cookware Set", "For all our future dinner parties.", 8999,
-             "https://images.unsplash.com/photo-1584990347449-a8b4ee0fff7c?w=600"),
-            ("Linen Bed Set", "King-size, sage green.", 6499,
-             "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600"),
-            ("Hand-thrown Pottery Set", "Dinner plates from a Pondicherry studio.", 4500,
-             "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600"),
-            ("Indoor Plant Collection", "To bring our new home alive.", 3200,
-             "https://images.unsplash.com/photo-1463320726281-696a485928c7?w=600"),
-            ("Vintage Record Player", "For lazy Sunday afternoons.", 18999,
-             "https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=600"),
+             ("Espresso Machine", "For slow mornings together.", 24999,
+             "/api/placeholder/gift"),
+             ("Cookware Set", "For all our future dinner parties.", 8999,
+             "/api/placeholder/gift"),
+             ("Linen Bed Set", "King-size, sage green.", 6499,
+             "/api/placeholder/gift"),
+             ("Hand-thrown Pottery Set", "Dinner plates from a Pondicherry studio.", 4500,
+             "/api/placeholder/gift"),
+             ("Indoor Plant Collection", "To bring our new home alive.", 3200,
+             "/api/placeholder/gift"),
+             ("Vintage Record Player", "For lazy Sunday afternoons.", 18999,
+             "/api/placeholder/gift"),
         ]:
             await db.gifts.insert_one({
                 "id": new_id(), "title": t, "description": d, "price": p,
@@ -769,6 +770,58 @@ async def upload_file(
     return {"url": f"/api/uploads/{safe_folder}/{name}"}
 
 
+# Admin: list uploaded files in a folder
+@api.get("/admin/uploads")
+async def list_uploads(folder: Optional[str] = None, _=Depends(require_admin)):
+    # If a folder is provided and valid, list that folder only. Otherwise list all folders.
+    allowed = {"gifts", "events", "hero", "story"}
+    files = []
+    if folder and folder in allowed:
+        p = UPLOAD_DIR / folder
+        if p.exists():
+            for f in sorted(p.iterdir(), key=lambda x: x.name):
+                if f.is_file():
+                    files.append({"name": f.name, "url": f"/api/uploads/{folder}/{f.name}", "folder": folder})
+    else:
+        # aggregate from all folders
+        for d in sorted(allowed):
+            p = UPLOAD_DIR / d
+            if not p.exists():
+                continue
+            for f in sorted(p.iterdir(), key=lambda x: x.name):
+                if f.is_file():
+                    files.append({"name": f.name, "url": f"/api/uploads/{d}/{f.name}", "folder": d})
+    return {"files": files}
+
+
+# Admin: delete an uploaded file
+@api.delete("/admin/uploads")
+async def delete_upload(name: str, folder: Optional[str] = None, _=Depends(require_admin)):
+    allowed = {"gifts", "events", "hero", "story"}
+    # If folder specified, delete there
+    if folder and folder in allowed:
+        p = UPLOAD_DIR / folder / name
+        if not p.exists() or not p.is_file():
+            raise HTTPException(404, "Not found")
+        try:
+            p.unlink()
+            return {"ok": True}
+        except Exception:
+            raise HTTPException(500, "Could not delete")
+
+    # Otherwise search all folders for the file name and delete the first match
+    for d in allowed:
+        p = UPLOAD_DIR / d / name
+        if p.exists() and p.is_file():
+            try:
+                p.unlink()
+                return {"ok": True}
+            except Exception:
+                raise HTTPException(500, "Could not delete")
+
+    raise HTTPException(404, "Not found")
+
+
 @api.get("/uploads/{folder}/{name}")
 async def serve_upload(folder: str, name: str):
     p = UPLOAD_DIR / folder / name
@@ -784,6 +837,8 @@ async def og_share_image():
     img = (s or {}).get("hero_image") or ""
     if img.startswith("http"):
         return RedirectResponse(url=img)
+    if img.startswith("/api/placeholder/"):
+        return RedirectResponse(url=img)
     if img.startswith("/api/uploads/"):
         parts = img.replace("/api/uploads/", "").split("/", 1)
         if len(parts) == 2:
@@ -796,7 +851,28 @@ async def og_share_image():
 # ---------- Mount ----------
 app.include_router(api)
 
-_cors_origins = os.environ.get("CORS_ORIGINS", "*").split(",")
+
+@api.get("/placeholder/{kind}")
+def placeholder(kind: str):
+        """Return a simple SVG placeholder image for the given kind.
+
+        This endpoint is intentionally minimal and avoids depending on external
+        services so the frontend can use a backend-hosted fallback instead of
+        rendering Unsplash images while settings are loading.
+        """
+        svg = f"""
+        <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675' viewBox='0 0 1200 675'>
+            <rect width='100%' height='100%' fill='#e6e2dc'/>
+            <g fill='#bdb0a4' font-family='Arial, Helvetica, sans-serif' font-size='36' text-anchor='middle'>
+                <text x='50%' y='50%' dy='0.35em'>Placeholder</text>
+            </g>
+        </svg>
+        """
+        return Response(content=svg, media_type="image/svg+xml")
+
+_cors_origins_raw = os.environ.get("CORS_ORIGINS", "*")
+# Split on commas, strip whitespace and ignore empty entries
+_cors_origins = [o.strip() for o in _cors_origins_raw.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=False if "*" in _cors_origins else True,

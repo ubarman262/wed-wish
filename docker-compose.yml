@@ -23,8 +23,8 @@ services:
     volumes:
       - backend_uploads:/app/uploads
     environment:
-      MONGO_URL: mongodb://mongo:27017
-      DB_NAME: wedwish
+      MONGO_URL: "${MONGO_URL:-mongodb://mongo:27017}"
+      DB_NAME: "${DB_NAME:-wedwish}"
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       JWT_SECRET: ${JWT_SECRET:-change-me-please}
@@ -36,7 +36,7 @@ services:
       context: ./frontend
       args:
         # Bake the backend URL into the React bundle at build time
-        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8001}
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-https://wedwishapi.mzxt.in}
     container_name: wedwish-frontend
     restart: unless-stopped
     depends_on:

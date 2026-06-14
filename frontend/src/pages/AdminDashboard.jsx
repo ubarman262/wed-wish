@@ -12,7 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, Plus, Trash2, Edit, Upload, Link as LinkIcon } from "lucide-react";
+import { LogOut, Plus, Trash2, Edit, Upload, Check, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const Stat = ({ label, value, testId }) => (
@@ -145,6 +145,60 @@ export default function AdminDashboard() {
     return data.url;
   };
 
+  // Media manager state
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaFolder, setMediaFolder] = useState(undefined);
+  const [mediaItems, setMediaItems] = useState([]);
+  const [mediaTarget, setMediaTarget] = useState(null); // callback to set selected URL
+  const [mediaLoading, setMediaLoading] = useState(false);
+
+  const openMedia = (folder, onSelect) => {
+    // folder argument ignored: we show all images across folders
+    setMediaFolder(undefined);
+    setMediaTarget(() => onSelect);
+    setMediaOpen(true);
+    fetchMedia();
+  };
+
+  const fetchMedia = async () => {
+    setMediaLoading(true);
+    try {
+      const { data } = await api.get(`/admin/uploads`);
+      setMediaItems(data.files || []);
+    } catch (e) {
+      toast.error("Could not load uploads");
+    } finally {
+      setMediaLoading(false);
+    }
+  };
+
+  const pickMedia = (url) => {
+    if (typeof mediaTarget === "function") mediaTarget(url);
+    setMediaOpen(false);
+  };
+
+  const removeMedia = async (name) => {
+    if (!confirm("Delete this file?")) return;
+    try {
+      await api.delete(`/admin/uploads?name=${encodeURIComponent(name)}`);
+      toast.success("Deleted");
+      fetchMedia();
+    } catch (e) { toast.error("Delete failed"); }
+  };
+
+  const handleMediaUpload = async (files) => {
+    if (!files?.length) return;
+    try {
+      // upload to default folder on server; folder concept removed in UI
+      const url = await uploadImage(files[0]);
+      toast.success("Uploaded");
+      fetchMedia(mediaFolder);
+      // automatically select the uploaded image
+      if (mediaTarget) mediaTarget(url);
+      setMediaOpen(false);
+    } catch (e) { toast.error("Upload failed"); }
+  };
+
   // Events
   const saveEvent = async (data) => {
     try {
@@ -271,15 +325,9 @@ export default function AdminDashboard() {
               <div className="md:col-span-2"><Label>Hero Image URL or Upload</Label>
                 <div className="flex gap-2">
                   <Input value={settings.hero_image || ""} onChange={(e) => setSettings({ ...settings, hero_image: e.target.value })} data-testid="settings-hero" />
-                  <label className="wed-btn-outline px-3 cursor-pointer">
-                    <Upload size={14} />
-                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                      if (e.target.files?.[0]) {
-                        const url = await uploadImage(e.target.files[0], "hero");
-                        setSettings({ ...settings, hero_image: url });
-                      }
-                    }} />
-                  </label>
+                  <button type="button" onClick={() => openMedia("hero", (url) => setSettings({ ...settings, hero_image: url }))} className="wed-btn-outline px-3">
+                    <Upload size={14} /> Choose
+                  </button>
                 </div>
                 {settings.hero_image && <img src={resolveImage(settings.hero_image)} alt="" className="mt-3 h-32 object-cover rounded" />}
               </div>
@@ -288,15 +336,9 @@ export default function AdminDashboard() {
               <div className="md:col-span-2"><Label>Story Image URL or Upload</Label>
                 <div className="flex gap-2">
                   <Input value={settings.story_image || ""} onChange={(e) => setSettings({ ...settings, story_image: e.target.value })} data-testid="settings-story-image" />
-                  <label className="wed-btn-outline px-3 cursor-pointer">
-                    <Upload size={14} />
-                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                      if (e.target.files?.[0]) {
-                        const url = await uploadImage(e.target.files[0], "story");
-                        setSettings({ ...settings, story_image: url });
-                      }
-                    }} />
-                  </label>
+                  <button type="button" onClick={() => openMedia("story", (url) => setSettings({ ...settings, story_image: url }))} className="wed-btn-outline px-3">
+                    <Upload size={14} /> Choose
+                  </button>
                 </div>
                 {settings.story_image && <img src={resolveImage(settings.story_image)} alt="" className="mt-3 h-32 object-cover rounded" />}
               </div>
@@ -602,6 +644,47 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
+      {/* Media manager dialog */}
+      <Dialog open={mediaOpen} onOpenChange={(v) => setMediaOpen(v)}>
+        <DialogContent className="max-w-3xl bg-[hsl(var(--card))]">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Media Library</DialogTitle></DialogHeader>
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm text-[hsl(var(--muted-foreground))]">Folder: <strong>{mediaFolder}</strong></div>
+              <div className="flex items-center gap-2">
+                <input type="file" accept="image/*" onChange={(e) => handleMediaUpload(e.target.files)} />
+                <button className="wed-btn-outline" onClick={() => fetchMedia(mediaFolder)}>Refresh</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" style={{ maxHeight: 420, overflow: "auto" }}>
+              {mediaLoading && <div>Loading…</div>}
+              {!mediaLoading && mediaItems.length === 0 && <div className="text-sm text-[hsl(var(--muted-foreground))]">No uploads yet.</div>}
+              {mediaItems.map((m) => (
+                <div key={m.name} className="p-2 border rounded relative">
+                  <img src={resolveImage(m.url)} alt={m.name} className="w-full h-28 object-cover rounded" />
+                  <div className="absolute top-2 right-2 flex items-center gap-2">
+                    <button
+                      onClick={() => pickMedia(m.url)}
+                      title="Select"
+                      className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:scale-105 transition-transform"
+                    >
+                      <Check size={16} className="text-green-700" />
+                    </button>
+                    <button
+                      onClick={() => removeMedia(m.name)}
+                      title="Delete"
+                      className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:scale-105 transition-transform"
+                    >
+                      <Trash2 size={16} className="text-red-700" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* EVENT MODAL */}
       <Dialog open={!!editEvent} onOpenChange={(v) => !v && setEditEvent(null)}>
         <DialogContent className="bg-[hsl(var(--card))] max-w-2xl">
@@ -621,15 +704,9 @@ export default function AdminDashboard() {
               <div><Label>Image URL or Upload</Label>
                 <div className="flex gap-2">
                   <Input value={editEvent.image_url || ""} onChange={(e) => setEditEvent({ ...editEvent, image_url: e.target.value })} />
-                  <label className="wed-btn-outline px-3 cursor-pointer">
-                    <Upload size={14} />
-                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                      if (e.target.files?.[0]) {
-                        const url = await uploadImage(e.target.files[0], "events");
-                        setEditEvent({ ...editEvent, image_url: url });
-                      }
-                    }} />
-                  </label>
+                  <button type="button" onClick={() => openMedia("events", (url) => setEditEvent({ ...editEvent, image_url: url }))} className="wed-btn-outline px-3">
+                    <Upload size={14} /> Choose
+                  </button>
                 </div>
               </div>
               <button onClick={() => saveEvent(editEvent)} className="wed-btn-primary w-full">Save</button>
@@ -653,15 +730,9 @@ export default function AdminDashboard() {
               <div><Label>Image URL or Upload</Label>
                 <div className="flex gap-2">
                   <Input value={editGift.image_url || ""} onChange={(e) => setEditGift({ ...editGift, image_url: e.target.value })} />
-                  <label className="wed-btn-outline px-3 cursor-pointer">
-                    <Upload size={14} />
-                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                      if (e.target.files?.[0]) {
-                        const url = await uploadImage(e.target.files[0], "gifts");
-                        setEditGift({ ...editGift, image_url: url });
-                      }
-                    }} />
-                  </label>
+                  <button type="button" onClick={() => openMedia("gifts", (url) => setEditGift({ ...editGift, image_url: url }))} className="wed-btn-outline px-3">
+                    <Upload size={14} /> Choose
+                  </button>
                 </div>
               </div>
               <button onClick={() => saveGift(editGift)} className="wed-btn-primary w-full">Save</button>
