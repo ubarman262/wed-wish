@@ -121,9 +121,6 @@ export default function Layout() {
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
             With love, made for our forever — {new Date().getFullYear()}.
           </p>
-          <Link to="/admin" className="text-xs text-[hsl(var(--muted-foreground))] hover:gold-text" data-testid="footer-admin-link">
-            Admin
-          </Link>
         </div>
       </footer>
     </div>
