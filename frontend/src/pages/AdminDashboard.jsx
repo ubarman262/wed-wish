@@ -50,8 +50,23 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const t = settings.theme || "champagne";
+    const themeColors = {
+      champagne: "#FAF9F6",
+      maroon: "#F7F2EB",
+      sage: "#F5F5EE",
+      midnight: "#171C26",
+      coral: "#F8EFE6",
+    };
     if (t === "champagne") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
+
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", themeColors[t] || themeColors.champagne);
   }, [settings.theme]);
 
   const loadAll = async () => {
