@@ -49,7 +49,7 @@ export default function Home() {
   })();
 
   return (
-    <div data-testid="home-page" className="pb-28 lg:pb-0">
+    <div data-testid="home-page">
       {/* HERO */}
       <section className="pt-6 pb-10 md:pb-16 lg:pt-12 lg:pb-20" data-testid="hero-section">
         <div className="wed-container">
@@ -311,18 +311,6 @@ export default function Home() {
         </div>
       </section>
       )}
-
-      {/* STICKY MOBILE ACTION BAR */}
-      <div className="lg:hidden fixed inset-x-3 bottom-3 z-30" data-testid="mobile-action-bar">
-        <div className="bg-[hsl(var(--primary))] rounded-full grid grid-cols-2 divide-x divide-white/30 shadow-2xl shadow-black/30">
-          <Link to="/events" className="text-white py-3 text-sm font-medium flex items-center justify-center gap-2">
-            <Heart size={15} /> RSVP
-          </Link>
-          <Link to="/registry" className="text-white py-3 text-sm font-medium flex items-center justify-center gap-2">
-            <Gift size={15} /> Gift Registry
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
