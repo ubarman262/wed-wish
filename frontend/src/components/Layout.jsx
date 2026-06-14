@@ -33,13 +33,15 @@ export default function Layout() {
     if (t === "champagne") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
 
-    let meta = document.querySelector('meta[name="theme-color"]');
+    let meta = document.querySelector('meta[name="theme-color"]:not([media])') || document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement("meta");
       meta.setAttribute("name", "theme-color");
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", themeColors[t] || themeColors.champagne);
+    // Remove any stale media-queried duplicates (iOS Safari prefers the no-media tag)
+    document.querySelectorAll('meta[name="theme-color"][media]').forEach((m) => m.remove());
   }, [settings.theme]);
 
   const coupleShort = (settings.nav_brand && settings.nav_brand.trim())
