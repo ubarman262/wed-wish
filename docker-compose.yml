@@ -1,0 +1,49 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: wedwish-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: wedwish-backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+    volumes:
+      - backend_uploads:/app/uploads
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      DB_NAME: wedwish
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      JWT_SECRET: ${JWT_SECRET:-change-me-please}
+      MAX_RESERVATIONS: ${MAX_RESERVATIONS:-2}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Bake the backend URL into the React bundle at build time
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8001}
+    container_name: wedwish-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mongo_data:
+  backend_uploads:
