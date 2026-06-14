@@ -13,11 +13,15 @@ const STATUS_LABEL = {
 
 export default function Registry() {
   const [gifts, setGifts] = useState([]);
+  const [settings, setSettings] = useState({});
   const [openIdentify, setOpenIdentify] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
 
   const load = () => api.get("/gifts").then((r) => setGifts(r.data || []));
   useEffect(() => { load(); }, []);
+  useEffect(() => { api.get("/settings").then((r) => setSettings(r.data || {})); }, []);
+
+  const showPrices = settings.registry_show_prices !== false;
 
   const guarded = (fn) => {
     if (!hasGuest()) {
@@ -65,7 +69,7 @@ export default function Registry() {
           Reserve to claim, then mark as purchased once you've bought it. Each guest may reserve up to 2 gifts.
         </p>
 
-        <div className="mt-12 grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 items-stretch">
           {gifts.map((g) => {
             const st = STATUS_LABEL[g.status];
             return (
@@ -75,9 +79,9 @@ export default function Registry() {
                     <img src={resolveImage(g.image_url)} alt={g.title} className="w-full h-full object-cover" />
                   )}
                 </div>
-                <div className="p-3 sm:p-5 flex-1 flex flex-col">
+                <div className="p-3 sm:p-5 lg:p-4 flex-1 flex flex-col">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-serif text-base sm:text-xl flex-1 leading-tight">{g.title}</h3>
+                    <h3 className="font-serif text-base sm:text-xl lg:text-lg flex-1 leading-tight">{g.title}</h3>
                     <span className={`text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.18em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded shrink-0 ${st.cls}`}>
                       {st.label}
                     </span>
@@ -85,7 +89,7 @@ export default function Registry() {
                   {g.description && (
                     <p className="hidden sm:block text-sm text-[hsl(var(--muted-foreground))] mt-2 line-clamp-2">{g.description}</p>
                   )}
-                  {g.price && (
+                  {g.price && showPrices && (
                     <p className="text-xs sm:text-sm gold-text mt-1.5 sm:mt-2 font-medium">₹{g.price.toLocaleString("en-IN")}</p>
                   )}
                   <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-[hsl(var(--border))]">

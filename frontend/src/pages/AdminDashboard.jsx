@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, resolveImage } from "@/lib/api";
 import { Input } from "@/components/ui/input";
+import DatePicker from "@/components/ui/datepicker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -55,7 +56,13 @@ export default function AdminDashboard() {
       maroon: "#F7F2EB",
       sage: "#F5F5EE",
       midnight: "#171C26",
-      coral: "#F8EFE6",
+        coral: "#F8EFE6",
+        lavender: "#F6F6FF",
+        ocean: "#EFFAFB",
+        emerald: "#F3FBF6",
+        nocturne: "#070816",
+        charcoal: "#0D1113",
+        "night-jade": "#05120d",
     };
     if (t === "champagne") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
@@ -69,6 +76,13 @@ export default function AdminDashboard() {
     meta.setAttribute("content", themeColors[t] || themeColors.champagne);
     document.querySelectorAll('meta[name="theme-color"][media]').forEach((m) => m.remove());
   }, [settings.theme]);
+
+  const isoToLocalInput = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
   const loadAll = async () => {
     try {
@@ -110,6 +124,17 @@ export default function AdminDashboard() {
       await api.put("/admin/settings", settings);
       toast.success("Settings saved");
     } catch { toast.error("Save failed"); }
+  };
+
+  // Patch a single setting immediately (used by quick toggles)
+  const updateSetting = async (patch) => {
+    setSettings((s) => ({ ...s, ...patch }));
+    try {
+      await api.put("/admin/settings", patch);
+      toast.success("Settings updated");
+    } catch (e) {
+      toast.error("Save failed");
+    }
   };
 
   const uploadImage = async (file, folder = "gifts") => {
@@ -219,15 +244,15 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="settings">
-          <TabsList className="grid grid-cols-3 md:grid-cols-7 gap-1 bg-[hsl(var(--secondary))]/40 w-full overflow-x-auto">
-            <TabsTrigger value="settings" data-testid="tab-settings">Settings</TabsTrigger>
-            <TabsTrigger value="events" data-testid="tab-events">Events</TabsTrigger>
-            <TabsTrigger value="gifts" data-testid="tab-gifts">Gifts</TabsTrigger>
-            <TabsTrigger value="funds" data-testid="tab-funds">Funds</TabsTrigger>
-            <TabsTrigger value="guests" data-testid="tab-guests">Guests</TabsTrigger>
-            <TabsTrigger value="rsvps" data-testid="tab-rsvps">RSVPs</TabsTrigger>
-            <TabsTrigger value="contribs" data-testid="tab-contribs">Contribs</TabsTrigger>
-          </TabsList>
+          <TabsList className="flex gap-1 md:grid md:grid-cols-7 bg-[hsl(var(--secondary))]/40 w-full overflow-x-auto overflow-y-hidden items-center pb-2" style={{ WebkitOverflowScrolling: "touch" }}>
+              <TabsTrigger value="settings" data-testid="tab-settings" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Settings</TabsTrigger>
+              <TabsTrigger value="events" data-testid="tab-events" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Events</TabsTrigger>
+              <TabsTrigger value="gifts" data-testid="tab-gifts" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Gifts</TabsTrigger>
+              <TabsTrigger value="funds" data-testid="tab-funds" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Funds</TabsTrigger>
+              <TabsTrigger value="guests" data-testid="tab-guests" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Guests</TabsTrigger>
+              <TabsTrigger value="rsvps" data-testid="tab-rsvps" className="whitespace-nowrap flex-shrink-0 px-3 py-1">RSVPs</TabsTrigger>
+              <TabsTrigger value="contribs" data-testid="tab-contribs" className="whitespace-nowrap flex-shrink-0 px-3 py-1">Contribs</TabsTrigger>
+            </TabsList>
 
           {/* SETTINGS */}
           <TabsContent value="settings" className="mt-8 wed-card p-8">
@@ -238,11 +263,11 @@ export default function AdminDashboard() {
               <div><Label>Couple Name 2</Label>
                 <Input value={settings.couple_name_2 || ""} onChange={(e) => setSettings({ ...settings, couple_name_2: e.target.value })} data-testid="settings-name2" /></div>
               <div><Label>Wedding Date (ISO)</Label>
-                <Input type="datetime-local" value={settings.wedding_date ? settings.wedding_date.substring(0, 16) : ""}
-                  onChange={(e) => setSettings({ ...settings, wedding_date: new Date(e.target.value).toISOString() })}
-                  data-testid="settings-date" /></div>
+                <DatePicker value={settings.wedding_date} onChange={(iso) => setSettings({ ...settings, wedding_date: iso })} showTime={true} data-testid="settings-date" />
+              </div>
               <div><Label>UPI ID</Label>
                 <Input value={settings.upi_id || ""} onChange={(e) => setSettings({ ...settings, upi_id: e.target.value })} data-testid="settings-upi" /></div>
+              
               <div className="md:col-span-2"><Label>Hero Image URL or Upload</Label>
                 <div className="flex gap-2">
                   <Input value={settings.hero_image || ""} onChange={(e) => setSettings({ ...settings, hero_image: e.target.value })} data-testid="settings-hero" />
@@ -290,6 +315,12 @@ export default function AdminDashboard() {
                   { key: "sage", name: "Sage Garden", bg: "#F5F5EE", fg: "#262E22", primary: "#557A4F", secondary: "#D6DCC5" },
                   { key: "midnight", name: "Midnight Rose", bg: "#171C26", fg: "#ECE5DA", primary: "#D88FA3", secondary: "#2C3340" },
                   { key: "coral", name: "Coral Sunset", bg: "#F8EFE6", fg: "#3B2820", primary: "#CB573F", secondary: "#ECD7C2" },
+                  { key: "lavender", name: "Lavender Bloom", bg: "#F6F6FF", fg: "#2B2B3A", primary: "#6F63FF", secondary: "#E9E6FF" },
+                  { key: "ocean", name: "Ocean Mist", bg: "#EFFAFB", fg: "#052B3A", primary: "#0E7C86", secondary: "#CFF0F3" },
+                  { key: "emerald", name: "Emerald Grove", bg: "#F3FBF6", fg: "#06301A", primary: "#1F8A70", secondary: "#CDEDD9" },
+                  { key: "nocturne", name: "Nocturne", bg: "#070816", fg: "#E7E7EE", primary: "#A8844C", secondary: "#1A2030" },
+                  { key: "charcoal", name: "Charcoal", bg: "#0D1113", fg: "#E6E6E6", primary: "#B86B3A", secondary: "#1F2224" },
+                  { key: "night-jade", name: "Night Jade", bg: "#05120d", fg: "#E8F7F2", primary: "#2AA087", secondary: "#0C2A24" },
                 ].map((t) => {
                   const active = (settings.theme || "champagne") === t.key;
                   return (
@@ -395,7 +426,7 @@ export default function AdminDashboard() {
                   {e.image_url && <img src={resolveImage(e.image_url)} className="w-24 h-24 object-cover rounded" alt="" />}
                   <div className="flex-1">
                     <h3 className="font-serif text-xl">{e.title}</h3>
-                    <p className="text-xs gold-text mt-1">{e.date && new Date(e.date).toLocaleString("en-IN")}</p>
+                    <p className="text-xs gold-text mt-1">{e.date && new Date(e.date).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
                     <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">{e.venue_name}</p>
                     <div className="flex gap-2 mt-3">
                       <button onClick={() => setEditEvent(e)} className="text-xs gold-text"><Edit size={12} className="inline" /> Edit</button>
@@ -409,11 +440,37 @@ export default function AdminDashboard() {
 
           {/* GIFTS */}
           <TabsContent value="gifts" className="mt-8">
-            <div className="flex justify-between items-center mb-5">
-              {sectionTitle("Gift Registry")}
-              <div className="flex gap-2">
-                <button onClick={() => setImportOpen(true)} className="wed-btn-outline" data-testid="gift-import"><LinkIcon size={14} /> Import URL</button>
-                <button onClick={() => setEditGift({})} className="wed-btn-primary" data-testid="gift-new"><Plus size={14} /> New gift</button>
+            <div className="flex flex-col sm:flex-row justify-between items-start mb-5">
+              <div>
+                {sectionTitle("Gift Registry")}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setImportOpen(true)}
+                    className="wed-btn-outline px-3 py-2 text-sm md:px-4 md:py-2 w-full sm:w-auto"
+                    data-testid="gift-import"
+                  >
+                    <LinkIcon size={14} /> Import URL
+                  </button>
+                  <button
+                    onClick={() => setEditGift({})}
+                    className="wed-btn-primary px-3 py-2 text-sm md:px-4 md:py-2 w-full sm:w-auto"
+                    data-testid="gift-new"
+                  >
+                    <Plus size={14} /> New gift
+                  </button>
+                </div>
+
+                <div className="mt-2 flex items-center gap-3 text-sm">
+                  <Switch
+                    checked={settings.registry_show_prices ?? true}
+                    onCheckedChange={(v) => updateSetting({ registry_show_prices: !!v })}
+                    data-testid="gifts-registry-show-prices"
+                  />
+                  <div className="text-[hsl(var(--muted-foreground))]">Show prices</div>
+                </div>
               </div>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -524,7 +581,7 @@ export default function AdminDashboard() {
                       <td className="gold-text">₹{c.amount?.toLocaleString("en-IN")}</td>
                       <td className="text-[hsl(var(--muted-foreground))] font-mono text-xs">{c.txn_ref || "—"}</td>
                       <td className="text-[hsl(var(--muted-foreground))]">{c.message || "—"}</td>
-                      <td className="text-xs text-[hsl(var(--muted-foreground))]">{new Date(c.created_at).toLocaleDateString("en-IN")}</td>
+                      <td className="text-xs text-[hsl(var(--muted-foreground))]">{new Date(c.created_at).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -536,7 +593,7 @@ export default function AdminDashboard() {
                 {messages.map((m) => (
                   <div key={m.id} className="border-l-2 border-[hsl(var(--primary))]/50 pl-4 py-2">
                     <p className="text-sm italic">"{m.message}"</p>
-                    <p className="text-xs gold-text mt-1">— {m.guest_name} · {new Date(m.created_at).toLocaleDateString("en-IN")}</p>
+                    <p className="text-xs gold-text mt-1">— {m.guest_name} · {new Date(m.created_at).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
                   </div>
                 ))}
               </div>
@@ -554,7 +611,9 @@ export default function AdminDashboard() {
               <div><Label>Title</Label><Input value={editEvent.title || ""} onChange={(e) => setEditEvent({ ...editEvent, title: e.target.value })} /></div>
               <div><Label>Description</Label><Textarea value={editEvent.description || ""} onChange={(e) => setEditEvent({ ...editEvent, description: e.target.value })} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Date/time</Label><Input type="datetime-local" value={editEvent.date ? editEvent.date.substring(0, 16) : ""} onChange={(e) => setEditEvent({ ...editEvent, date: new Date(e.target.value).toISOString() })} /></div>
+                <div><Label>Date/time</Label>
+                  <DatePicker value={editEvent.date} onChange={(iso) => setEditEvent({ ...editEvent, date: iso })} showTime={true} />
+                </div>
                 <div><Label>Venue</Label><Input value={editEvent.venue_name || ""} onChange={(e) => setEditEvent({ ...editEvent, venue_name: e.target.value })} /></div>
               </div>
               <div><Label>Address</Label><Input value={editEvent.address || ""} onChange={(e) => setEditEvent({ ...editEvent, address: e.target.value })} /></div>

@@ -32,7 +32,7 @@ export default function Home() {
 
   const cd = useCountdown(settings.wedding_date);
   const dateStr = settings.wedding_date
-    ? new Date(settings.wedding_date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })
+    ? new Date(settings.wedding_date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })
     : "";
   const vp = settings.visible_pages || {};
   const showStory = vp.our_story !== false;
@@ -221,7 +221,7 @@ export default function Home() {
                   <div className="font-serif text-base leading-tight">{e.title}</div>
                   <div className="text-[10px] gold-text mt-1.5 flex items-center gap-1">
                     <Calendar size={9} />
-                    {e.date ? new Date(e.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                    {e.date ? new Date(e.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }) : ""}
                   </div>
                   {e.venue_name && (
                     <div className="text-[10px] text-[hsl(var(--muted-foreground))] mt-1 flex items-center gap-1 truncate max-w-full">
@@ -243,16 +243,16 @@ export default function Home() {
               </div>
               <Link to="/events" className="text-sm gold-text hover:underline">All events →</Link>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
               {events.slice(0, 4).map((e) => (
-                <div key={e.id} className="wed-card overflow-hidden">
-                  <div className="aspect-[4/5] overflow-hidden">
+                <div key={e.id} className="wed-card overflow-hidden flex flex-col">
+                  <div className="aspect-[4/5] overflow-hidden flex-shrink-0">
                     <img src={resolveImage(e.image_url)} alt={e.title} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-5">
+                  <div className="p-5 flex-1">
                     <h3 className="font-serif text-2xl">{e.title}</h3>
                     <p className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--primary))] mt-2">
-                      {e.date ? new Date(e.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : ""}
+                      {e.date ? new Date(e.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }) : ""}
                     </p>
                   </div>
                 </div>
@@ -274,17 +274,19 @@ export default function Home() {
               Reserve a gift to let us know it's coming — or contribute to our shared funds.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 items-stretch">
             {gifts.slice(0, 3).map((g) => (
-              <div key={g.id} className="wed-card overflow-hidden">
-                <div className="aspect-square overflow-hidden bg-[hsl(var(--muted))]">
+              <div key={g.id} className="wed-card overflow-hidden flex flex-col">
+                <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--muted))] flex-shrink-0">
                   <img src={resolveImage(g.image_url)} alt={g.title} className="w-full h-full object-cover" />
                 </div>
-                <div className="p-3 sm:p-5">
-                  <h3 className="font-serif text-base sm:text-xl leading-tight">{g.title}</h3>
-                  <p className="text-xs sm:text-sm text-[hsl(var(--muted-foreground))] mt-1">
-                    ₹{g.price?.toLocaleString("en-IN")}
-                  </p>
+                <div className="p-2 sm:p-3 flex-1">
+                  <h3 className="font-serif text-sm sm:text-base leading-tight">{g.title}</h3>
+                  {settings.registry_show_prices !== false && g.price && (
+                    <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">
+                      ₹{g.price?.toLocaleString("en-IN")}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

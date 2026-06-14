@@ -111,13 +111,13 @@ export default function EventsPage() {
                     {dt && (
                       <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))]">
                         <Calendar size={16} className="gold-text" />
-                        {dt.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                        {dt.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}
                       </div>
                     )}
                     {dt && (
                       <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))]">
                         <Clock size={16} className="gold-text" />
-                        {dt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                        {dt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                       </div>
                     )}
                     {e.venue_name && (

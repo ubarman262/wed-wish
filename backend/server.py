@@ -173,6 +173,7 @@ class SiteSettingsIn(BaseModel):
     nav_labels: Optional[dict] = None
     nav_brand: Optional[str] = None
     theme: Optional[str] = None
+    registry_show_prices: Optional[bool] = None
 
 
 class ProductImport(BaseModel):
@@ -188,6 +189,7 @@ async def seed_data():
             "_key": "site",
             "couple_name_1": "Ujjwal",
             "couple_name_2": "Kasturika",
+            "registry_show_prices": True,
             "wedding_date": (datetime.now(timezone.utc) + timedelta(days=120)).isoformat(),
             "hero_image": "https://images.pexels.com/photos/35069916/pexels-photo-35069916.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
             "story_content": "Our story began in a quiet bookshop in 2019. What started as a chance conversation grew into a love that has weathered late-night phone calls, long-distance trips, shared dreams and quiet mornings. We are excited to begin this next chapter together — surrounded by the people who shaped us.",
